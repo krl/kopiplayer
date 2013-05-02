@@ -24,24 +24,22 @@
   (let [releases        (search "type:release AND artist-id:" id)
         with-recordings (map (fn [release]
                                (assoc release :recordings
-                                      (search "type:recording AND "
-                                              "release-id:" (:id release))))
-                             releases)]
+                                      (sort-by #(Integer. (:number %))
+                                               (search "type:recording AND "
+                                                       "release-id:" (:id release)))))
+                             releases)
+        sorted           (sort-by :date with-recordings)]
     (assoc (get-id id)
-      :releases with-recordings)))
+      :releases sorted)))
 
 (defn all-artists []
-  (reduce (fn [artists artist]
-            (let [key (-> artist :sort-name first str keyword)]
-              (assoc artists key (conj (or (key artists) '())
-                                       artist))))
-          {}
-          (search "type:artist")))
-
-(first (search "type:artist"))
-
-{:release-id "20ef2364-7fc0-4f4d-a204-746acc4782ac", :type "recording", :id "4b86fe34-2055-4c4c-8414-5364871c0ab7", :length "923706", :title "Köhntarkösz, Part 1", :number "1"}
-
-{:type "release", :id "20ef2364-7fc0-4f4d-a204-746acc4782ac", :artist-id "7f89e84d-4c35-4d53-a965-4f3ce1c4ef4f", :date "1988", :title "Köhntarkösz"}
-
-{:type "recording", :id "20ef2364-7fc0-4f4d-a204-746acc4782ac", :artist-id "7f89e84d-4c35-4d53-a965-4f3ce1c4ef4f", :date "1988", :title "Köhntarkösz"}
+  (sort-by first
+           (seq
+            (reduce (fn [artists artist]
+                      (let [key (-> artist :sort-name first str keyword)]              
+                        (assoc artists key 
+                               (sort-by :sort-name
+                                        (conj (or (key artists) '())
+                                              artist)))))
+                    {}
+                    (search "type:artist")))))

@@ -51,7 +51,7 @@
                     {:channel response-ch}))
   (init-client response-ch))
 
-(defn deliver-file [id]
+(defn serve-file [id]
   (let [file (index/get-id id)]
     {:status 200
      :headers {"Content-Type" "audio/ogg"}
@@ -61,7 +61,7 @@
   (GET "/socket" []
     (wrap-aleph-handler init-session))
   (GET ["/"] {} (slurp "resources/index.html"))
-  (GET "/play/:id" [id] (deliver-file id))
+  (GET "/play/:id" [id] (serve-file id))
   (route/resources "/resources/public")
   (route/not-found "Page not found"))
 
@@ -71,6 +71,6 @@
   (when @server* (@server*))
   (reset! server* (start-http-server 
                    (wrap-ring-handler app-routes)
-                   {:port 8082 :websocket true})))
+                   {:port 8081 :websocket true})))
 
 (start-server)
