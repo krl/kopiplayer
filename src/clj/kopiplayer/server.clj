@@ -1,55 +1,27 @@
 (ns kopiplayer.server
   (:use [clojure.java.io]
         [kopiplayer.debug]
-        [lamina.core]
-        [ring.middleware.resource]
+        [ring.middleware.resource]        
         [compojure.core]
         [aleph.http])
-  (:require [compojure.route  :as route]
-            [kopiplayer.index :as index]))
-
-(defn messages [messages]
-  [:messages messages])
-
-(defn message [& stuff]
-  (vec stuff))
-
-(defn send-message [ch message]
-  (enqueue ch (pr-str message)))
-
-(defn send-artist-info [ch id]
-  (send-message ch [:artist-info (index/artist-info id)]))
-
-(defn play-recording [ch id]
-  (let [recording (index/get-id id)
-        file      (first (index/search "recording-id:" (:id recording)))]    
-    (send-message ch [:play (:id file)])))
-
-(defn handle-message [state msg]
-  (println "handle message" msg)
-  (let [[command & args] (read-string msg)]
-    (case command
-      :artist-info    (send-artist-info (:channel state) 
-                                        (first args))
-      :play-recording (play-recording   (:channel state)
-                                        (first args)))    
-    (receive (:channel state)
-             (partial handle-message state))))
+  (:require [lamina.core :as lamina]
+            [compojure.route  :as route]
+            [kopiplayer.index :as index]
+            [kopiplayer.messages :as msg]))
 
 (def latest-session* (atom nil))
 
-(defn init-client
-  "Sends the data the client needs to prepare the frontend"
-  [ch]
-  (send-message ch [:artists (all-artists)]))
+(defn message-loop [state]
+  (lamina/receive 
+   (:channel state)
+   (fn [data]
+     (let [msg       (read-string data)
+           new-state (msg/handle-message state msg)]
+       (message-loop (dbg new-state))))))
 
-(defn init-session [response-ch _]
-  (reset! latest-session* response-ch)
-  (receive response-ch
-           (partial handle-message
-                    ;; initial state
-                    {:channel response-ch}))
-  (init-client response-ch))
+(defn init-session [ch _]
+  (reset! latest-session* ch)
+  (message-loop {:channel ch}))
 
 (defn serve-file [id]
   (let [file (index/get-id id)]
@@ -69,8 +41,9 @@
 
 (defn start-server []
   (when @server* (@server*))
+  (. Thread (sleep 1000))
   (reset! server* (start-http-server 
                    (wrap-ring-handler app-routes)
-                   {:port 8081 :websocket true})))
+                   {:port 2888 :websocket true})))
 
 (start-server)

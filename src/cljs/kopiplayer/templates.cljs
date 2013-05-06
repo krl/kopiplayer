@@ -25,3 +25,7 @@
        [:span.date (str " (" (:date release) ")")]]
       [:table
        (map recording (:recordings release))]])])
+
+(defpartial menu-button [data]
+  [:div.button {:data-value data}
+   (:caption data)])
