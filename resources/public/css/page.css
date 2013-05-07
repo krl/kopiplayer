@@ -1,14 +1,14 @@
 body {background: #aff;}
 
-#artists { background: #7ff;
+#sidebar { background: #7ff;
 					 width:      280px;
 					 height:     800px;}
 
-#artist_info { background:   #7ff;
-							 position:     absolute;
-							 left:         300px;
-							 width:        800px;
-							 height:       800px;}
+#content { background:   #7ff;
+					 position:     absolute;
+					 left:         300px;
+					 width:        800px;
+					 height:       800px;}
 
 #letter_separator {border-bottom: 1px solid black;}
 

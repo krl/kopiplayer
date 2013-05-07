@@ -5,20 +5,22 @@
   (:use-macros [kopiplayer.macros :only [defhandler defevent]])
   (:require [kopiplayer.templates :as tpl]))
 
-(def $artists ($ :#artists))
-(def $artist-info ($ :#artist_info))
+(def $sidebar ($ :#sidebar))
+(def $content ($ :#content))
 
 (defn display-artists [artists]
-  (doseq [[letter artistlist] artists]
-    (let [box ($ (tpl/letter-box (name letter)))]
+  (let [container ($ (tpl/div))]
+    (doseq [[letter artistlist] artists]
+      (let [letterbox ($ (tpl/letter-box (name letter)))]
 
-      (doseq [artist artistlist]
-        (append box (tpl/artist-entry artist)))
+        (doseq [artist artistlist]
+          (append letterbox (tpl/artist-entry artist)))
 
-      (append $artists box))))
+        (append container letterbox)))
+    (append $sidebar container)))
 
 (defn display-artist-info [artist]
-  (append (inner $artist-info "") (tpl/artist-info artist)))
+  (inner $content (tpl/artist-info artist)))
 
 ;; handlers
   

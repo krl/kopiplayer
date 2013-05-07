@@ -44,6 +44,6 @@
   (. Thread (sleep 1000))
   (reset! server* (start-http-server 
                    (wrap-ring-handler app-routes)
-                   {:port 2888 :websocket true})))
+                   {:port 8080 :websocket true})))
 
 (start-server)

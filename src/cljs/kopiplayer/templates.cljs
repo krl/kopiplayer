@@ -2,6 +2,9 @@
   (:require [crate.core :as crate])
   (:use-macros [crate.def-macros :only [defpartial]]))
 
+(defpartial div []
+  [:div])
+
 (defpartial letter-box [letter]
   [:div.letterbox
    [:div.letter_separator
