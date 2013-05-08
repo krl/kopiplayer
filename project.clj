@@ -22,6 +22,7 @@
   :plugins [[lein-cljsbuild "0.3.0"]]
   :hooks [leiningen.cljsbuild]
   :source-paths ["src/clj"]
+  :main kopiplayer.main
   :cljsbuild { 
     :builds {
       :main {
